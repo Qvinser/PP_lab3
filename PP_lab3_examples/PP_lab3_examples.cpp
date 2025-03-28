@@ -8,7 +8,7 @@ int main() {
 	for (int i = 0; i < 100; i++)
 		a[i] = i;
 	// Применение опции reduction
-#pragma omp parallel private(id, size) reduction(+:sum)
+#pragma omp parallel private(id, size)
 	{ // Начало параллельной области
 		id = omp_get_thread_num();
 		size = omp_get_num_threads();
@@ -22,10 +22,15 @@ int main() {
 		int end = start + a_local_size;
 		// Каждый поток суммирует элементы
 		// своей части массива
+		int partial_sum = 0;
 		for (int i = start; i < end; i++)
-			sum += a[i];
+		{
+			partial_sum += a[i];
+		}
+		#pragma omp critical
+		{ sum += partial_sum; }
 		// Каждый поток выводит свою частичную сумму
-		cout << "Thread " << id << ", partial sum = " << sum << endl;
+		cout << "Thread " << id << ", partial sum = " << partial_sum << endl;
 	}
 	// Благодаря опции reduction сумма частичных
 	// результатов добавлена к значению переменной
