@@ -8,6 +8,7 @@ using namespace std;
 
 void Mul(int N, double** A, double* x, double* y)
 {
+#pragma omp parallel for
     for (int i = 0; i < N; i++)
     {
         y[i] = 0;
@@ -44,6 +45,7 @@ void Jacobi(int N, double** A, double* F, double* X)
     int cnt = 0;
     start = omp_get_wtime();
     do {
+    #pragma omp parallel for
         for (int i = 0; i < N; i++)
         {
             TempX[i] = F[i];
@@ -53,6 +55,7 @@ void Jacobi(int N, double** A, double* F, double* X)
             TempX[i] /= A[i][i];
         }
         norm = abs(X[0] - TempX[0]);
+    #pragma omp parallel for reduction(min:norm)
         for (int h = 0; h < N; h++)
         {
             if (abs(X[h] - TempX[h]) > norm)
