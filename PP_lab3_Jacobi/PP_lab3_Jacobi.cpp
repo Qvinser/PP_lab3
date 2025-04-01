@@ -36,7 +36,8 @@ void PrintVec(int N, double* A)
 }
 void Jacobi(int N, double** A, double* F, double* X)
 {
-    double eps = 0.001, norm, * TempX = new double[N], start, end;
+    double eps = 0.001, norm, start, end;
+    double* TempX = new double[N];
     //start=omp_get_wtime();
     for (int k = 0; k < N; k++)
         TempX[k] = X[k];
@@ -95,7 +96,7 @@ int main()
     PrintVec(n, b);
     x = new double[n];
     for (int i = 0; i < n; i++)
-        x[i] = 1.0;
+        x[i] = 20.0;
     y = new double[n];
     cout << endl << b[1] << endl;
     Jacobi(n, Matrix, b, x);
