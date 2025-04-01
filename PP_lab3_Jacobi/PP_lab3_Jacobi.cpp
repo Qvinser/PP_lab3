@@ -101,7 +101,7 @@ int main()
     for (int i = 0; i < n; i++)
         x[i] = 20.0;
     y = new double[n];
-    cout << endl << b[1] << endl;
+    cout << endl << endl;
     Jacobi(n, Matrix, b, x);
     cout << "Результат | x: ";
     PrintVec(n, x);
