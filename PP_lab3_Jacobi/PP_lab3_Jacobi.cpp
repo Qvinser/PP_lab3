@@ -3,6 +3,7 @@
 #include <math.h>
 #include <omp.h>
 #include <cstdlib> 
+#include <random> 
 using namespace std;
 
 
@@ -71,7 +72,6 @@ void Jacobi(int N, double** A, double* F, double* X)
 }
 void Load(int& N, double**& A, double*& F)
 {
-    setlocale(0, "");
     ifstream fin;
     fin.open("input.txt");
     fin >> N;
@@ -88,28 +88,74 @@ void Load(int& N, double**& A, double*& F)
     fin.close();
 }
 
+
+// Генерация матрицы с диагональным преобладанием
+void generateDiagonallyDominantMatrix(int n, double**& A) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dist(-5.0, 5.0);
+    A = new double*[n];
+    for (int i = 0; i < n; ++i) {
+        double sum = 0.0;
+        A[i] = new double[n];
+        for (int j = 0; j < n; ++j) {
+            if (i != j) {
+                A[i][j] = dist(gen);
+                sum += std::abs(A[i][j]);
+            }
+        }
+        // Обеспечим диагональное преобладание
+        A[i][i] = sum + dist(gen) + 1.0; // гарантируем, что |a_ii| > сумма остальных
+        if (dist(gen) < 0) A[i][i] *= -1;
+    }
+}
+
+// Генерация вектора правых частей
+void generateRHS(int n, double*& F) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dist(-10.0, 10.0);
+    F = new double[n];
+    for (int i = 0; i < n; ++i)
+        F[i] = dist(gen);
+}
+
 int main()
 {
     double** Matrix, * b, * y, * x;
-    int n;
-    Load(n, Matrix, b);
-    cout << "Матрица:\n";
-    PrintMatrix(n, Matrix);
-    cout << "b: ";
-    PrintVec(n, b);
+    int n = 4000;
+    int thread_num = 1;
+    omp_set_num_threads(thread_num);
+    setlocale(0, "");
+    generateDiagonallyDominantMatrix(n, Matrix);
+    generateRHS(n, b);
+    //Load(n, Matrix, b);
+    if (n<=6) {
+        cout << "Матрица:\n";
+        PrintMatrix(n, Matrix);
+        cout << "b: ";
+        PrintVec(n, b);
+    }
     x = new double[n];
     for (int i = 0; i < n; i++)
         x[i] = 20.0;
     y = new double[n];
     cout << endl << endl;
     Jacobi(n, Matrix, b, x);
-    cout << "Результат | x: ";
-    PrintVec(n, x);
-    cout << "A*x=b | b: ";
-    Mul(n, Matrix, x, y);
-    PrintVec(n, y);
+    if (n <= 10) {
+        cout << "Результат | x: ";
+        PrintVec(n, x);
+        cout << "A*x=b | b: ";
+        Mul(n, Matrix, x, y);
+        PrintVec(n, y);
+    }
     delete x;
     delete y;
-    system("pause");
+    for (int i = 0; i < n; i++)
+    {
+        delete[] Matrix[i];
+    }
+    delete[] Matrix;
+    //system("pause");
     return 1;
 }
