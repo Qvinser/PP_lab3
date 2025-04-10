@@ -123,7 +123,7 @@ void generateRHS(int n, double*& F) {
 int main()
 {
     double** Matrix, * b, * y, * x;
-    int n = 5000;
+    int n = 9000;
     int thread_num = 1;
     omp_set_num_threads(thread_num);
     setlocale(0, "");
