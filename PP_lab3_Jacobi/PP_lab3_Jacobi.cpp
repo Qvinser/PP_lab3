@@ -5,6 +5,8 @@
 #include <cstdlib> 
 #include <random> 
 using namespace std;
+//#define SEED rd()
+#define SEED 0
 
 
 void Mul(int N, double** A, double* x, double* y)
@@ -92,7 +94,7 @@ void Load(int& N, double**& A, double*& F)
 // Генерация матрицы с диагональным преобладанием
 void generateDiagonallyDominantMatrix(int n, double**& A) {
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(SEED);
     std::uniform_real_distribution<> dist(-5.0, 5.0);
     A = new double*[n];
     for (int i = 0; i < n; ++i) {
@@ -113,7 +115,7 @@ void generateDiagonallyDominantMatrix(int n, double**& A) {
 // Генерация вектора правых частей
 void generateRHS(int n, double*& F) {
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(SEED);
     std::uniform_real_distribution<> dist(-10.0, 10.0);
     F = new double[n];
     for (int i = 0; i < n; ++i)
@@ -124,7 +126,7 @@ int main()
 {
     double** Matrix, * b, * y, * x;
     int n = 9000;
-    int thread_num = 1;
+    int thread_num = 16;
     omp_set_num_threads(thread_num);
     setlocale(0, "");
     generateDiagonallyDominantMatrix(n, Matrix);
@@ -145,10 +147,19 @@ int main()
     if (n <= 10) {
         cout << "Результат | x: ";
         PrintVec(n, x);
+    }
+    if (n <= 10) {
         cout << "A*x=b | b: ";
-        Mul(n, Matrix, x, y);
+    }
+    Mul(n, Matrix, x, y);
+    if (n <= 10) {
         PrintVec(n, y);
     }
+    double bsum = 0.0;
+    for (int i = 0; i < n; i++) {
+        bsum += fabs(b[i] - y[i]);
+    }
+    cout << "Среднее отклонение b при обратной проверке = " << bsum/n << endl;
     delete x;
     delete y;
     for (int i = 0; i < n; i++)
